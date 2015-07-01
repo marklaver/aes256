@@ -1,19 +1,21 @@
-UTEID: mcl267;
-FIRSTNAME: Mark;
-LASTNAME: Laver;
-CSACCOUNT: mcl267
-EMAIL: crusherven@yahoo.com;
+UTEID: mcl267; mw23845;
+FIRSTNAME: Mark; Marguerite;
+LASTNAME: Laver; West-Driga;
+CSACCOUNT: mcl267; mwestdri;
+EMAIL: crusherven@yahoo.com; mwestdri@gmail.com;
 
 [Program 4]
 [Description]
 ***************************
-There are 2 java files: 
-SecureSystem.java was improved slightly and made more modular, so that objects can be created and destroyed on the fly as per the requirements.  In the Subject class, String bits was added to assemble a String representation of the bits involved by concatenating a '1' or '0' as needed.  Then it is converted to a byte array, then back to a string, which is printed when run() goes.  run() has a helper function to do the actual file printing.
-
-CovertChannel.java has a few methods.  One sends messages to do Hal's work, another sends the instructions for Lyle's work, and a third converts a String to bits.
+There is only one java file: 
+AES.java implements AES encryption and decryption in the main method.
+First, it reads in the input file and key file as detailed in the
+specification. The contents are loaded into arrays of the appropriate
+dimensions, and are then encrypted or decrypted based on the 'e' or 'd' flag passed in at execution, via the command line.
+Our implementation of the decryption portion of this algorithm, is different from the structure recommended by the standard, and instead directly inverts the order of operations occurring in the encryption procedure.
 
 [Finish]
-I was not able to implement the verbose flag
+This program is done.
 
 [Test Cases]
 [Input of test 1]
