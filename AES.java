@@ -1,13 +1,13 @@
 import java.util.*;
 import java.io.*;
 
-public class AESa {
+public class AES {
 
 	static int[][] plain_text;
 	static int[][] cipher_text;
 	static int[][] st;
 
-	AESa(int size) {
+	AES(int size) {
 		st = new int[4][4];
 		plain_text = new int[size][16];
 		cipher_text = new int[size][16];
@@ -28,7 +28,7 @@ public class AESa {
 		int[][] key = reshapeKey(hexToBin(keyarray.get(0)));
 
 		ArrayList<String> cleanText = cleanHex(text);
-		AESa state = new AESa(cleanText.size());
+		AES state = new AES(cleanText.size());
 
 		if (option == 'e') {
 			for (int i = 0; i < plain_text.length; ++i) {

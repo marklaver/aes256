@@ -16,35 +16,61 @@ Our implementation of the decryption portion of this algorithm, is different fro
 
 [Finish]
 This program is done.
+We used the mix-columns code provided by Professor Young
 
 [Test Cases]
 [Input of test 1]
 [command line]
-java AES e key plaintext
-java AES d key plaintext.enc
+javac *.java
+java AES e key1 test1
+java AES d key1 test1.enc
+diff test1 test1.enc.dec
 
-plaintext
+test1
 
 [Output of test 1]
-plaintext.enc
-plaintext.enc.dec
-   
+ 
+test1.enc
+test1.enc.dec
+
 [Input of test 2]
 [command line]
-You need to write down command line.
+javac *.java
+java AES e key2 test2
+java AES d key2 test2.enc
 
-You need to write down filename.
+key2
+test2
 
 [Output of test 2]
 
-You need to write down filename.
+test2.enc
+test2.enc.dec
 
 [Input of test 3]
 [command line]
+javac *.java
+java AES e key3 test3
+java AES d key3 test3.enc
+
+key3
+test3
 
 [Output of test 3]
 
+test3.enc
+test3.enc.dec
+
 [Input of test 4]
 [command line]
+javac *.java
+java AES e key4 test4
+java AES d key4 test4.enc
+
+key4
+test4
 
 [Output of test 4]
+
+test4.enc
+test4.enc.dec
