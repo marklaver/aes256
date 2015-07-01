@@ -38,23 +38,41 @@ public class AESa {
 		for (int i = 0; i < plain_text.length; ++i) {
 			plain_text[i] = hexToBin(cleanText.get(i));
 		}
-
+    print_array("key_orig", key);
+    int [][] expanded_key = key_expansion(key);
+    // System.out.println("expanded_key is: ");
+    // print_array("Expaaanded key",expanded_key);
+    
 		// Encrypt
 		for (int row = 0; row < plain_text.length; ++row) {
-			// for (int round = 0; round < 13; ++round) {
+      
 			setState(row, 'e');
-			// print_state();
+			print_state("initial");
+      addRoundKey(expanded_key, 0);
 
-			subBytes();
-			// print_state();
-			shiftRows();
-			// print_state();
-			for (int i = 0; i < 4; ++i)
-				mixColumn2(i);
-			// print_state();
+			for (int round = 1; round <= 13; ++round) {
 
+			print_state("start r: " + round);
 
-		// }
+				subBytes();
+				print_state("s_box:");
+				shiftRows();
+				print_state("s_row:");
+				for (int i = 0; i < 4; ++i)
+					mixColumn2(i);
+				print_state("m_col:");
+	      addRoundKey(expanded_key, round);
+				//print_state("output:");
+
+		  }
+
+		  subBytes();
+			print_state("s_box:");
+		  shiftRows();
+			print_state("s_row:");
+      addRoundKey(expanded_key, 14);
+			print_state("output:");
+
 			save_state(row);
 		}
 
@@ -80,14 +98,8 @@ public class AESa {
 		// Below are print statements to test the code.
 		// **************************************************************
 
-		System.out.println(keyarray.get(0) + "\n");
-		for (int i = 0; i < key.length; ++i) {
-		  for (int j = 0; j < key[i].length; ++j) {
-		    System.out.printf(" %02x", key[i][j]);
-		  }
-		  System.out.println();
-		}    
-
+		// System.out.println(keyarray.get(0) + "\n");
+    
 		// System.out.println();
 		// for (String s : cleanText) {
 		//   System.out.println(s);
@@ -109,12 +121,32 @@ public class AESa {
 		// End print statements
 		// *********************************************************************
 	}
-	static void print_state() {
-		for (int i = 0; i < 4; ++i) {
-		  for (int j = 0; j < 4; ++j) {
-		    System.out.printf(" %02x", st[i][j]);
+
+  static void print_array(String name, int[][] key) {
+  	System.out.println(name  + ":");
+		for (int i = 0; i < key.length; ++i) {
+		  for (int j = 0; j < key[i].length; ++j) {
+		    System.out.printf(" %02x", key[i][j]);
 		  }
 		  System.out.println();
+		}
+		System.out.println("##############################");
+  }
+  static void print_array(String name, int[] key) {
+  	System.out.println(name  + ":");
+	  for (int j = 0; j < key.length; ++j) {
+	    System.out.printf(" %02x", key[j]);
+	  }
+	  System.out.println();
+	  System.out.println("##############################");
+  }
+	static void print_state(String s) {
+		System.out.print(s + "\t");
+		for (int i = 0; i < 4; ++i) {
+		  for (int j = 0; j < 4; ++j) {
+		    System.out.printf("%02x", st[j][i]);
+		  }
+		  // System.out.println();
 		}
 		System.out.println(); 
 		}     
@@ -146,52 +178,66 @@ AddRoundKey()
 	// 	}
 	// }
 
+
 // Pseudocode copied from Rijndael's page
-	static keyExpansion(int[][] key) {
+	static int[][] key_expansion(int[][] key) {
 		int nk = 8;
 		int nb = 4;
 		int nr = 14;
-
-    int expanded_key  = new int [4][nb*(nr+1)];
+			//System.out.println(key[0].length);
+    int[][] expanded_key  = new int[4][nb*(nr+1)];
     //copy first 8 columns
-    for (int r = 0; r < nk; r++) {
+    for (int r = 0; r < nb; r++) {
       for (int c = 0; c < nk; c++) {
         expanded_key[r][c] = key[r][c];
       }
     }
+    int rcon_idx = 0;
+		for (int c = nk; c < nb*(nr+1); ++c) {
 
-		for (int c = nk; c < key[0].length; ++c) {
-			int w[] = new int[4];
 			int[] temp = new int[4];
 			for (int i = 0; i < 4; i++) {
-				// Get the working column
-				temp[i] = key[i][c-1];						
+				// Get the previous column
+				temp[i] = expanded_key[i][c-1];	
+				//System.out.print(temp[i] + " ");
 			}
-			if (c % nk == 0) //each 8 columns
-			  temp = sub_word(rot_word(temp)) ^ Rcon;
+			//System.out.println();
 
+			if (c % nk == 0) {  // each 8th column 
+			  temp = rot_word(temp);  //rcon[0][rcon_idx++];
+			  temp = sub_word(temp);
+			  temp[0] = temp[0] ^ rcon[rcon_idx++];
+			}
+			else if (c % nk == 4) {// each 4th column
+				temp = sub_word(temp);
+		  }
 			for (int i = 0; i < 4; i++) {
-				// Get the column to be filled
-				 w[i] = key[i][c];						
+				// Fill the new column with the xor of temp - 1 and temp - 8
+				expanded_key[i][c] = expanded_key[i][c-nk] ^ temp[i];
 			}
-	
 		}
-
-
-		int i = nk;
-
-		while (i < nb * (nr + 1)) {
+		return expanded_key;
+	}
 	
-			int temp = w[i - 1];
-			if (i % nk == 0)
-				temp = SubWord(RotWord(temp)) ^ Rcon[i/nk]
-			else if (nk > 6 && i % nk == 4)
-				temp = SubWord(temp)
+	final static int[] rcon = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40 };
 
-			w[i] = w[i-nk] xor temp
-			i = i + 1
-
-		}
+  static void addRoundKey(int [][] expanded_key, int c) {
+    c *= 4;
+    for (int row = 0; row < 4; row++)
+      for (int i = 0; i < 4; i++) {
+        int col = i + c;
+        st[row][i] = (st[row][i]) ^ (expanded_key[row][col]);
+      }
+  }
+	
+	static int[] sub_word(int[] w) {
+		int[] result = new int[4];
+		for (int i = 0; i < 4; ++i) {
+				int n = w[i]; 
+				result[i] = sbox[(n & 0xf0) >> 4][n & 0xf];
+		}		
+		return result;
+	}
 
 	static int[] rot_word(int[] w) {
 		int x = w[0];
@@ -200,27 +246,6 @@ AddRoundKey()
 		w[2] = w[3];
 		w[3] = x;
 		return w;
-	}
-
-  // for (int j = 0; j < Nk; ++j) 
-  //   for (int i = 0; i < 4; ++i)
-  //     W[i][j] = K[i][j];
-  // for (int j = Nk; j < Nb(Nr + 1); ++j) {
-  //   if (j % Nk == 0) {
-  //     W[0][j] = W[0][j - Nk] ^ S[W[i][j - 1]] ^ RC[j / Nk];
-  //     for (int i = 1; i < 4; ++i)
-  //       W[i][j] = W[i][j - Nk] ^ S[W[i + 1 % 4][j - 1]];
-  //   }
-  //   else if (j % Nk == 4) {
-  //     for (int i = 0; i < 4; ++i)
-  //       W[i][j] = W[i][j - Nk] ^ S[W[i][j-1]];
-  //   }
-  //   else {
-  //     for (int i = 0; i < 4; ++i) 
-  //       W[i][j] = W[i][j - Nk] ^ W[i][j-1]];
-  //   }
-		
-  // }
 	}
 
  	static void save_state(int row) {
@@ -276,18 +301,18 @@ AddRoundKey()
 		for (int i = 0; i < 4; ++i)
 			for (int j = 0; j < 4; ++j) {
 				if (flag == 'd')
-					st[i][j] = cipher_text[row][idx++];
+					st[j][i] = cipher_text[row][idx++];
 				else	
-					st[i][j] = plain_text[row][idx++];
+					st[j][i] = plain_text[row][idx++];
 			}
 	}
 
 	static int[][] reshapeKey(int[] keyin) {
 		int[][] keyout = new int[4][8];
 		int idx = 0;
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 8; ++j) {
-				keyout[i][j] = keyin[idx++];
+		for (int i = 0; i < 8; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				keyout[j][i] = keyin[idx++];
 			}
 		}
 
@@ -506,6 +531,7 @@ AddRoundKey()
 		}
 	}  
 }
+
 
 
 
