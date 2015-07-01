@@ -2,14 +2,7 @@ import java.util.*;
 import java.io.*;
 
 public class AESa {
-	// static byte[][] st;
 
-	// AESa(int size) {
-	//   st = new byte[size][16];
-	// }
-
-	// This needs to be changed, probably?  The state is the block we're
-	// currently working on.
 	static int[][] plain_text;
 	static int[][] cipher_text;
 	static int[][] st;
@@ -23,6 +16,7 @@ public class AESa {
 	// Nb = 4          # of columns in the state
 	// Nk = 8          # of 32-bit words in Key
 	// Nr = 14         # of rounds
+
 	public static void main(String[] args) {
 		char option = args[0].charAt(0);
 		String keyFile = args[1];
@@ -35,174 +29,137 @@ public class AESa {
 
 		ArrayList<String> cleanText = cleanHex(text);
 		AESa state = new AESa(cleanText.size());
-		for (int i = 0; i < plain_text.length; ++i) {
-			plain_text[i] = hexToBin(cleanText.get(i));
-		}
-		print_array("key_orig", key);
-		int [][] expanded_key = key_expansion(key);
-		// System.out.println("expanded_key is: ");
-		// print_array("Expaaanded key",expanded_key);
-		
-		// Encrypt
-		for (int row = 0; row < plain_text.length; ++row) {
-			
-			setState(row, 'e');
-			print_state("plaintext");
-			addRoundKey(expanded_key, 0);
 
-			for (int round = 1; round <= 13; ++round) {
-
-//			print_state("start r: " + round);
-
-				subBytes();
-//				print_state("s_box:");
-				shiftRows();
-//				print_state("s_row:");
-				for (int i = 0; i < 4; ++i)
-					mixColumn2(i);
-//				print_state("m_col:");
-				addRoundKey(expanded_key, round);
-				//print_state("output:");
-
+		if (option == 'e') {
+			for (int i = 0; i < plain_text.length; ++i) {
+				plain_text[i] = hexToBin(cleanText.get(i));
 			}
-
-			subBytes();
-//			print_state("s_box:");
-			shiftRows();
-//			print_state("s_row:");
-			addRoundKey(expanded_key, 14);
-//			print_state("output:");
-
-			save_state(row);
 		}
+		else if (option == 'd') {
+			for (int i = 0; i < plain_text.length; ++i) {
+				cipher_text[i] = hexToBin(cleanText.get(i));
+			}			
+		}
+
+		int [][] expanded_key = key_expansion(key);
+		
+		if(option == 'e') {
+			encrypt(expanded_key);
+			writeFile(cipher_text, inputFile, 'e');
+		}
+		else if (option == 'd') {
+			decrypt(expanded_key);
+			writeFile(plain_text, inputFile, 'd');
+		}
+		else if (option == 't') {
+			encrypt(expanded_key);
+			writeFile(cipher_text, inputFile, 'e');
+			decrypt(expanded_key);
+			writeFile(plain_text, inputFile, 'd');
+		}
+		else
+			System.out.println("Invalid flag.");
+
+		// Encrypt
+
+
 
 
 		// Decrypt
 
+		// for (int row = 0; row < plain_text.length; ++row) {
+		// 	setState(row, 'd');
+		// 	addRoundKey(expanded_key,14);
+		// 	invShiftRows();
+		// 	invSubBytes();
+			
+		// 	for (int round = 13; round >= 1; --round) {
+		// 		addRoundKey(expanded_key, round);
+		// 		for (int i = 0; i < 4; ++i)
+		// 			invMixColumn2(i);
+		// 		invShiftRows();
+		// 		invSubBytes();
+		// 	}
+
+  //     addRoundKey(expanded_key, 0);
+		// }
+	}
+
+	static void encrypt(int[][] expanded_key) {
+		for (int row = 0; row < plain_text.length; ++row) {
+			setState(row, 'e');
+			addRoundKey(expanded_key, 0);
+
+			for (int round = 1; round <= 13; ++round) {
+				subBytes();
+				shiftRows();
+				for (int i = 0; i < 4; ++i)
+					mixColumn2(i);
+				addRoundKey(expanded_key, round);
+				
+			}
+
+			subBytes();
+			shiftRows();
+			addRoundKey(expanded_key, 14);
+			save_state(row, 'e');
+		}
+	}
+
+	static void decrypt(int[][] expanded_key) {
 		for (int row = 0; row < plain_text.length; ++row) {
 			setState(row, 'd');
-			print_state("start:");
-            addRoundKey(expanded_key,14);
-			print_state("key_add:");
-            
+			addRoundKey(expanded_key,14);
 			invShiftRows();
-			print_state("s_row:");
-
 			invSubBytes();
-			print_state("s_box:");
-
+			
 			for (int round = 13; round >= 1; --round) {
-
 				addRoundKey(expanded_key, round);
-                print_state("start r: " + round);
-
 				for (int i = 0; i < 4; ++i)
 					invMixColumn2(i);
-				print_state("m_col:");
-
 				invShiftRows();
-				print_state("s_row:");
-
 				invSubBytes();
-				print_state("s_box:");
-				//print_state("output:");
 			}
 
-            addRoundKey(expanded_key, 0);
-			print_state("output:");
-		}
-
-
-		// Below are print statements to test the code.
-		// **************************************************************
-
-		// System.out.println(keyarray.get(0) + "\n");
-		
-		// System.out.println();
-		// for (String s : cleanText) {
-		//   System.out.println(s);
-		// }
-
-		// System.out.println();
-
-		// for (int i = 0; i < plain_text.length; ++i) {
-		//   for (int j = 0; j < plain_text[i].length; ++j) {
-		//     System.out.printf(" %02x", plain_text[i][j]);
-		//   }
-		//   System.out.println();
-		// }
-		//   System.out.println();
-
-
-
-
-		// End print statements
-		// *********************************************************************
+      addRoundKey(expanded_key, 0);
+      save_state(row, 'd');
+		}		
 	}
 
-	static void print_array(String name, int[][] key) {
-		System.out.println(name  + ":");
-		for (int i = 0; i < key.length; ++i) {
-			for (int j = 0; j < key[i].length; ++j) {
-				System.out.printf(" %02x", key[i][j]);
-			}
-			System.out.println();
-		}
-		System.out.println("##############################");
-	}
-	static void print_array(String name, int[] key) {
-		System.out.println(name  + ":");
-		for (int j = 0; j < key.length; ++j) {
-			System.out.printf(" %02x", key[j]);
-		}
-		System.out.println();
-		System.out.println("##############################");
-	}
-	static void print_state(String s) {
-		System.out.print(s + "\t");
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				System.out.printf("%02x", st[j][i]);
-			}
-			// System.out.println();
-		}
-		System.out.println(); 
-		}     
-/*
-Todo:
+//	static void print_array(String name, int[][] key) {
+//		System.out.println(name  + ":");
+//		for (int i = 0; i < key.length; ++i) {
+//			for (int j = 0; j < key[i].length; ++j) {
+//				System.out.printf(" %02x", key[i][j]);
+//			}
+//			System.out.println();
+//		}
+//		System.out.println("##############################");
+//	}
+//	static void print_array(String name, int[] key) {
+//		System.out.println(name  + ":");
+//		for (int j = 0; j < key.length; ++j) {
+//			System.out.printf(" %02x", key[j]);
+//		}
+//		System.out.println();
+//		System.out.println("##############################");
+//	}
+//	static void print_state(String s) {
+//		System.out.print(s + "\t");
+//		for (int i = 0; i < 4; ++i) {
+//			for (int j = 0; j < 4; ++j) {
+//				System.out.printf("%02x", st[j][i]);
+//			}
+//			// System.out.println();
+//		}
+//		System.out.println(); 
+//		}     
 
-Change ints to bytes?
-Key expansion
-invSubBytes()
-invShiftRows()
-MixColumns() - done, needs testing
-AddRoundKey()
-
- x8 + x4 + x3 + x1 + 1 = 100011011 = 11B
-*/
-
-	// static void shiftRows() {
-	//  int[] original = new int[4];
-	//  for (int row = 1; row < 4; ++row) {
-	//    for (int i = 0; i < 4; ++i) {
-	//      original[i] = st[row][i];
-	//    }
-	//    int idx = row;
-	//    for (int i = 0; i < 4; ++i) {
-	//      if (idx > 3)
-	//        idx -= 4;
-	//      st[row][i] = original[idx++];
-	//    }
-	//  }
-	// }
-
-
-// Pseudocode copied from Rijndael's page
 	static int[][] key_expansion(int[][] key) {
 		int nk = 8;
 		int nb = 4;
 		int nr = 14;
-			//System.out.println(key[0].length);
+
 		int[][] expanded_key  = new int[4][nb*(nr+1)];
 		//copy first 8 columns
 		for (int r = 0; r < nb; r++) {
@@ -217,16 +174,14 @@ AddRoundKey()
 			for (int i = 0; i < 4; i++) {
 				// Get the previous column
 				temp[i] = expanded_key[i][c-1]; 
-				//System.out.print(temp[i] + " ");
 			}
-			//System.out.println();
 
 			if (c % nk == 0) {  // each 8th column 
 				temp = rot_word(temp);  //rcon[0][rcon_idx++];
 				temp = sub_word(temp);
 				temp[0] = temp[0] ^ rcon[rcon_idx++];
 			}
-			else if (c % nk == 4) {// each 4th column
+			else if (c % nk == 4) { // each 4th column
 				temp = sub_word(temp);
 			}
 			for (int i = 0; i < 4; i++) {
@@ -266,11 +221,15 @@ AddRoundKey()
 		return w;
 	}
 
-	static void save_state(int row) {
+	static void save_state(int row, char flag) {
 		int idx = 0;
 		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 4; ++j)
-				cipher_text[row][idx++] = st[j][i];
+			for (int j = 0; j < 4; ++j) {
+				if (flag == 'e')
+					cipher_text[row][idx++] = st[j][i];
+				if (flag == 'd')
+					plain_text[row][idx++] = st[j][i];
+			}
 	}
 
 	static void shiftRows() {
@@ -528,7 +487,17 @@ AddRoundKey()
 		return result;
 	}
 
-	static void writeFile(ArrayList<String> message, String fileName, char flag) {
+	//static void writeFile(ArrayList<String> message, String fileName, char flag) {
+	static void writeFile(int[][] text, String fileName, char flag) {
+		String[] message = new String[text.length];
+		for (int i = 0; i < text.length; ++i) {
+			String s = "";
+			for (int j = 0; j < text[0].length; ++j) {
+				s += String.format("%02x",text[i][j]);
+			}
+			message[i] = s;
+		}
+
 		try {
 			File file;
 			if (flag == 'e')
@@ -539,8 +508,8 @@ AddRoundKey()
 				file.createNewFile();
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
-			for (int i = 0; i < message.size(); ++i)
-				bw.write(message.get(i) + "\n");
+			for (int i = 0; i < message.length; ++i)
+				bw.write(message[i] + "\n");
 			bw.write("\n");
 			bw.close();
 		}
