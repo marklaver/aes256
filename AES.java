@@ -60,29 +60,6 @@ public class AES {
 		else
 			System.out.println("Invalid flag.");
 
-		// Encrypt
-
-
-
-
-		// Decrypt
-
-		// for (int row = 0; row < plain_text.length; ++row) {
-		// 	setState(row, 'd');
-		// 	addRoundKey(expanded_key,14);
-		// 	invShiftRows();
-		// 	invSubBytes();
-			
-		// 	for (int round = 13; round >= 1; --round) {
-		// 		addRoundKey(expanded_key, round);
-		// 		for (int i = 0; i < 4; ++i)
-		// 			invMixColumn2(i);
-		// 		invShiftRows();
-		// 		invSubBytes();
-		// 	}
-
-  //     addRoundKey(expanded_key, 0);
-		// }
 	}
 
 	static void encrypt(int[][] expanded_key) {
@@ -121,39 +98,10 @@ public class AES {
 				invSubBytes();
 			}
 
-      addRoundKey(expanded_key, 0);
-      save_state(row, 'd');
+			addRoundKey(expanded_key, 0);
+			save_state(row, 'd');
 		}		
 	}
-
-//	static void print_array(String name, int[][] key) {
-//		System.out.println(name  + ":");
-//		for (int i = 0; i < key.length; ++i) {
-//			for (int j = 0; j < key[i].length; ++j) {
-//				System.out.printf(" %02x", key[i][j]);
-//			}
-//			System.out.println();
-//		}
-//		System.out.println("##############################");
-//	}
-//	static void print_array(String name, int[] key) {
-//		System.out.println(name  + ":");
-//		for (int j = 0; j < key.length; ++j) {
-//			System.out.printf(" %02x", key[j]);
-//		}
-//		System.out.println();
-//		System.out.println("##############################");
-//	}
-//	static void print_state(String s) {
-//		System.out.print(s + "\t");
-//		for (int i = 0; i < 4; ++i) {
-//			for (int j = 0; j < 4; ++j) {
-//				System.out.printf("%02x", st[j][i]);
-//			}
-//			// System.out.println();
-//		}
-//		System.out.println(); 
-//		}     
 
 	static int[][] key_expansion(int[][] key) {
 		int nk = 8;
@@ -254,7 +202,6 @@ public class AES {
 			}
 		}
 	}
-
 
 	static void invSubBytes() {
 		for (int i = 0; i < 4; ++i)
@@ -428,7 +375,6 @@ public class AES {
 		// logtables to do the computation.
 
 		// *********changed from byte to int************
-		// byte a[] = new byte[4];
 		int a[] = new int[4];
 
 		// note that a is just a copy of st[.][c]
@@ -441,10 +387,6 @@ public class AES {
 		st[1][c] = (int)(mul(2,a[1]) ^ a[3] ^ a[0] ^ mul(3,a[2]));
 		st[2][c] = (int)(mul(2,a[2]) ^ a[0] ^ a[1] ^ mul(3,a[3]));
 		st[3][c] = (int)(mul(2,a[3]) ^ a[1] ^ a[2] ^ mul(3,a[0]));
-		// st[0][c] = (byte)(mul(2,a[0]) ^ a[2] ^ a[3] ^ mul(3,a[1]));
-		// st[1][c] = (byte)(mul(2,a[1]) ^ a[3] ^ a[0] ^ mul(3,a[2]));
-		// st[2][c] = (byte)(mul(2,a[2]) ^ a[0] ^ a[1] ^ mul(3,a[3]));
-		// st[3][c] = (byte)(mul(2,a[3]) ^ a[1] ^ a[2] ^ mul(3,a[0]));
 	} // mixColumn2
 
 	static void invMixColumn2 (int c) {
@@ -461,11 +403,6 @@ public class AES {
 		st[1][c] = (int)(mul(0xE,a[1]) ^ mul(0xB,a[2]) ^ mul(0xD, a[3]) ^ mul(0x9,a[0]));
 		st[2][c] = (int)(mul(0xE,a[2]) ^ mul(0xB,a[3]) ^ mul(0xD, a[0]) ^ mul(0x9,a[1]));
 		st[3][c] = (int)(mul(0xE,a[3]) ^ mul(0xB,a[0]) ^ mul(0xD, a[1]) ^ mul(0x9,a[2]));
-		
-		// st[0][c] = (byte)(mul(0xE,a[0]) ^ mul(0xB,a[1]) ^ mul(0xD, a[2]) ^ mul(0x9,a[3]));
-		// st[1][c] = (byte)(mul(0xE,a[1]) ^ mul(0xB,a[2]) ^ mul(0xD, a[3]) ^ mul(0x9,a[0]));
-		// st[2][c] = (byte)(mul(0xE,a[2]) ^ mul(0xB,a[3]) ^ mul(0xD, a[0]) ^ mul(0x9,a[1]));
-		// st[3][c] = (byte)(mul(0xE,a[3]) ^ mul(0xB,a[0]) ^ mul(0xD, a[1]) ^ mul(0x9,a[2]));
 	} // invMixColumn2  
 
 	static ArrayList<String> readFile(String fileName) {
@@ -487,7 +424,6 @@ public class AES {
 		return result;
 	}
 
-	//static void writeFile(ArrayList<String> message, String fileName, char flag) {
 	static void writeFile(int[][] text, String fileName, char flag) {
 		String[] message = new String[text.length];
 		for (int i = 0; i < text.length; ++i) {
@@ -518,28 +454,3 @@ public class AES {
 		}
 	}  
 }
-
-
-
-
-
-// byte[] version
-	// static byte[] hexToBin(String s) {
-	//   int len = s.length();
-	//   byte[] result = new byte[len / 2];
-	//   for (int i = 0; i < len; i += 2) {
-	//     result[i / 2] = (byte)((Character.digit(s.charAt(i), 16) << 4)
-	//                           + Character.digit(s.charAt(i+1), 16));
-	//   }
-
-	//   return result;
-	// }  
-
-
-	// static int highNibble(int n) {
-	//   return (n & 0xf0) >> 4;
-	// }
-
-	// static int lowNibble(int n) {
-	//   return (n & 0xf);
-	// }

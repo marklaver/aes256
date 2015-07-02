@@ -17,6 +17,24 @@ Our implementation of the decryption portion of this algorithm, is different fro
 [Finish]
 This program is done.
 We used the mix-columns code provided by Professor Young
+We pulled a method to convert String to binary from StackOverflow:
+http://stackoverflow.com/questions/140131/convert-a-string-representation-of-a-hex-dump-to-a-byte-array-using-java
+
+[Timing Information]
+
+We ran a AEStestvectors.py to generate a test vector of 60k linesls -, and ran it with the bash command "time" with our program to find the encryption/decryption time.  Below is the command used to encrypt/decrypt along with the results.
+
+time java AES e key1 throughputtest 
+
+encryption data:
+time: 1.396s
+size: 1.9MB
+throughput: 1.361 MB/sec
+
+decryption data:
+time: 1.378s
+size: 1.9MB
+throughput: 1.379 MB/sec
 
 [Test Cases]
 [Input of test 1]
